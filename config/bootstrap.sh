@@ -8,9 +8,9 @@ PLUGINS_DIR="$SOURCEMOD_DIR/plugins"
 GAMEDATA_DIR="$SOURCEMOD_DIR/gamedata"
 
 # Ramp Glitch Fix
-echo "- Ramp Glitch Fix"
-cp -v "$PWD/config/ramp_glitch_patch/ramp_slope_fix.games.txt" "$GAMEDATA_DIR"
-cp -v "$PWD/config/ramp_glitch_patch/ramp_slope_fix.smx" "$PLUGINS_DIR"
+# echo "- Ramp Glitch Fix"
+# cp -v "$PWD/config/ramp_glitch_patch/ramp_slope_fix.games.txt" "$GAMEDATA_DIR"
+# cp -v "$PWD/config/ramp_glitch_patch/ramp_slope_fix.smx" "$PLUGINS_DIR"
 
 # CSGO Movement Unlocker
 echo "- CSGO Movement Unlocker"
