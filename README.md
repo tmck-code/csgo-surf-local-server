@@ -67,3 +67,6 @@ changing direction on a ramp
 
 > from https://github.com/kiljon/extended-speed-meter
 
+### CSGO Movement Unlocker
+
+> from https://forums.alliedmods.net/showthread.php?t=255298
