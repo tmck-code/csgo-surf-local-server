@@ -7,7 +7,7 @@ services:
     command: --default-authentication-plugin=mysql_native_password
     environment:
       - MYSQL_DATABASE=sourcemod
-      - MYSQL_ROOT_PASSWORD=$CSGO_DB_ROOT_PASSWORD
+      - MYSQL_ROOT_PASSWORD=${CSGO_DB_ROOT_PASSWORD:-psswd}
     volumes:
       - ./mysql:/var/lib/mysql
     ports:
