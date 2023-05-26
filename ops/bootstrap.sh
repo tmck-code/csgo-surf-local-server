@@ -12,21 +12,22 @@ GAMEDATA_DIR="$SOURCEMOD_DIR/gamedata"
 # to somewhere in the server CSGO config path.
 # These locations are always under the csgo/ config dir, but vary per-repo
 
-# recommended/required for SurfTimer ------------
+# recommended for SurfTimer ---------------------
 
-# Momentum Mod Ramp Glitch Fix
-echo "- Momentum Mod Ramp Glitch Fix"
+# - Momentum Mod Ramp Glitch Fix
+echo "- Momentum Mod Ramp Glitch Fix (MomSurfFix)"
 git clone gitgithub.com:GAMMACASE/MomSurfFix.git
 cp -Rv MomSurfFix/addons "$CSGO_DIRPATH"
 rm -rf MomSurfFix
 
-# CSGO Movement Unlocker
+# - CSGO Movement Unlocker
 # I've included the files in this repo, they are originally sourced from the
 # AlliedModders forum post here:
 # https://forums.alliedmods.net/showthread.php?t=255298
 echo "- CSGO Movement Unlocker"
-cp -v "$PWD/config/csgo_movement_unlocker/csgo_movement_unlocker.games.txt" "$GAMEDATA_DIR"
-cp -v "$PWD/config/csgo_movement_unlocker/csgo_movement_unlocker.smx" "$PLUGINS_DIR"
+plugin_dir="$PWD/config/plugins/csgo_movement_unlocker"
+cp -v "$plugin_dir/csgo_movement_unlocker.games.txt" "$GAMEDATA_DIR"
+cp -v "$plugin_dir/csgo_movement_unlocker.smx" "$PLUGINS_DIR"
 
 # map chooser
 echo "- SurfTimer Map Chooser"
@@ -47,11 +48,11 @@ git clone https://github.com/Sayt123/SurfZones
 
 # config files ----------------------------------
 
-# install server cfg file
-# - this contains
+# - install server cfg file
 echo "- surf_server.cfg config file"
 cp -v config/surf_server.cfg "$CSGO_DIR/cfg/"
 
+# - install the surftimer cfg file
 echo "- surftimer.cfg config file"
 mkdir -p "$CSGO_DIR/cfg/sourcemod/surftimer/"
 cp -v config/surftimer.cfg "$CSGO_DIR/cfg/sourcemod/surftimer/"
