@@ -1,0 +1,30 @@
+version: '3.4'
+
+services:
+  db:
+    image: mysql:latest
+    container_name: csgo-db
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      - MYSQL_DATABASE=sourcemod
+      - MYSQL_ROOT_PASSWORD=${CSGO_DB_ROOT_PASSWORD:-psswd}
+    volumes:
+      - ./mysql:/var/lib/mysql
+    ports:
+      - "3306:3306"
+
+  server:
+    image: cm2network/csgo:sourcemod
+    container_name: csgo
+    network_mode: host
+    environment:
+      - SRCDS_TOKEN=$CSGO_GSLT
+      - SRCDS_NET_PUBLIC_ADDRESS=10.0.0.39
+      - SRCDS_IP=0.0.0.0
+      - SRCDS_TICKRATE=64
+      - SRCDS_FPSMAX=120
+      - SRCDS_HOSTNAME=arrakis
+      - SRCDS_STARTMAP=surf_anzchamps
+    volumes:
+      - ./data:/home/steam/csgo-dedicated
+
