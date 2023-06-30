@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -euxo pipefail
+set -euo pipefail
 
 DEST_DIR="${1:-$PWD}"
 CSGO_DIR="$DEST_DIR/csgo"
@@ -8,17 +8,15 @@ SOURCEMOD_DIR="$CSGO_DIR/addons/sourcemod"
 PLUGINS_DIR="$SOURCEMOD_DIR/plugins"
 GAMEDATA_DIR="$SOURCEMOD_DIR/gamedata"
 
-mkdir -p "$CSGO_DIR"
-
-# plugins ---------------------------------------
-function print_starting()   { printf "\e[0;31m${1}\e[0m" ; }
-function print_complete()   { printf "\e[0;32m${1}\e[0m" ; }
-function print_installing() { printf "\e[0;33m${1}\e[0m" ; }
-
-# directories ------------------------------------
-
 ROOT_DATA_DIR="${1:-${PWD}}"
 CSGO_DIR="$ROOT_DATA_DIR/csgo"
+
+# plugins ---------------------------------------
+function print_starting()   { printf "\e[0;31m${1}\e[0m" ; };
+function print_complete()   { printf "\e[0;32m${1}\e[0m" ; };
+function print_installing() { printf "\e[0;33m${1}\e[0m" ; };
+
+# directories ------------------------------------
 
 dirs=(
   csgo
@@ -60,7 +58,7 @@ function MomSurfFix() {
   print_starting "MomSurfFix (Momentum Mod Ramp Glitch Fix)"
 
   rm -rf MomSurfFix
-  git clone git@github.com:GAMMACASE/MomSurfFix.git
+  git clone https://github.com/GAMMACASE/MomSurfFix.git
   cp -Rv MomSurfFix/addons "$CSGO_DIR"
   rm -rf MomSurfFix
   print_complete "MomSurfFix"
@@ -72,8 +70,8 @@ function MomSurfFix() {
 function CSGOMovementUnlocker() {
   print_starting "CSGO Movement Unlocker"
   plugin_dir="$PWD/ops/plugins/csgo_movement_unlocker"
-  cp -v "$plugin_dir/csgo_movement_unlocker.games.txt" "$CSGO_DIR/gamedata"
-  cp -v "$plugin_dir/csgo_movement_unlocker.smx" "$CSGO_DIR/plugins"
+  cp -v "$plugin_dir/csgo_movement_unlocker.games.txt" "$GAMEDATA_DIR/"
+  cp -v "$plugin_dir/csgo_movement_unlocker.smx" "$PLUGINS_DIR/"
   print_complete "CSGO Movement Unlocker"
 }
 
@@ -125,20 +123,19 @@ function zone_coordinates() {
 
 # config files ----------------------------------
 
-function install_csf_files() {
-  local csgo_dir="$1"
-
+function install_cfg_files() {
   # - install server cfg file
-  cp -v config/surf_server.cfg "$csgo_dir/cfg/"
+  cp -v ops/configs/surf_server.cfg "$CSGO_DIR/cfg/"
   print_complete "surf_server.cfg config file"
 
   # - install the surftimer cfg file
-  mkdir -p "$csgo_dir/cfg/sourcemod/surftimer/"
-  cp -v config/surftimer.cfg "$csgo_dir/cfg/sourcemod/surftimer/"
+  mkdir -p "$CSGO_DIR/cfg/sourcemod/surftimer/"
+  cp -v ops/configs/surftimer.cfg "$CSGO_DIR/cfg/sourcemod/surftimer/"
   print_complete "surftimer.cfg config file"
 }
 
 # run --------------------------------------------
 
+mkdir -p "$CSGO_DIR" "$PLUGINS_DIR" "$GAMEDATA_DIR"
 install_plugins
-install_csf_files "$CSGO_DIR"
+install_cfg_files
