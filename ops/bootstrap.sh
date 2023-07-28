@@ -12,9 +12,9 @@ ROOT_DATA_DIR="${1:-${PWD}}"
 CSGO_DIR="$ROOT_DATA_DIR/csgo"
 
 # plugins ---------------------------------------
-function print_starting()   { printf "\e[0;31m${1}\e[0m" ; };
-function print_complete()   { printf "\e[0;32m${1}\e[0m" ; };
-function print_installing() { printf "\e[0;33m${1}\e[0m" ; };
+function print_starting()   { printf "\e[0;31m${1}\e[0m\n" ; };
+function print_complete()   { printf "\e[0;32m${1}\e[0m\n" ; };
+function print_installing() { printf "\e[0;33m${1}\e[0m\n" ; };
 
 # directories ------------------------------------
 
