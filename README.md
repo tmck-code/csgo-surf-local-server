@@ -12,6 +12,16 @@ Bootstrapping/building this will
     1. this copies/overrides any cfgs etc. from the ops/configs dir
 4. run everything with docker-compose up
 
+## running
+
+```shell
+# for a regular 64 tick server
+docker-compose up
+
+# for a 100 tick server
+SRCDS_TICKRATE=100 docker-compose up
+```
+
 ## Additional Config
 
 ### `surf_server.cfg`
