@@ -26,6 +26,7 @@ SRCDS_TICKRATE=100 docker-compose up
 
 - [ ] create separate cfg/docker-compose definitions for 64/85/100 tick rates
 - [ ] get the ramp fix and movement unlocker working
+- [ ] account for all required cfg files, add to ops/configs and mount them correctly
 
 ## Additional Config
 
