@@ -22,6 +22,11 @@ docker-compose up
 SRCDS_TICKRATE=100 docker-compose up
 ```
 
+## TODO
+
+- [ ] create separate cfg/docker-compose definitions for 64/85/100 tick rates
+- [ ] get the ramp fix and movement unlocker working
+
 ## Additional Config
 
 ### `surf_server.cfg`
