@@ -13,18 +13,32 @@ services:
     ports:
       - "3306:3306"
 
-  server:
+  surftimer-64t:
     image: cm2network/csgo:sourcemod
-    container_name: csgo-${SRCDS_TICKRATE:-64}
+    container_name: surftimer-64t
     network_mode: host
     environment:
       - SRCDS_TOKEN=$CSGO_GSLT
-      - SRCDS_NET_PUBLIC_ADDRESS=10.0.0.39
+      - SRCDS_NET_PUBLIC_ADDRESS=$SRCDS_NET_PUBLIC_ADDRESS
       - SRCDS_IP=0.0.0.0
       - SRCDS_FPSMAX=120
-      - SRCDS_TICKRATE=${SRCDS_TICKRATE:-64}
-      - SRCDS_HOSTNAME=arrakis_${SRCDS_TICKRATE:-64}
-      - SRCDS_STARTMAP=surf_lavaflow
+      - SRCDS_TICKRATE=64
+      - SRCDS_HOSTNAME=surftimer_64t
+      - SRCDS_STARTMAP=${SRCDS_STARTMAP:-surf_utopia_njv}
     volumes:
       - ./data:/home/steam/csgo-dedicated
 
+  surftimer-100t:
+    image: cm2network/csgo:sourcemod
+    container_name: surftimer-100t
+    network_mode: host
+    environment:
+      - SRCDS_TOKEN=$CSGO_GSLT
+      - SRCDS_NET_PUBLIC_ADDRESS=$SRCDS_NET_PUBLIC_ADDRESS
+      - SRCDS_IP=0.0.0.0
+      - SRCDS_FPSMAX=120
+      - SRCDS_TICKRATE=100
+      - SRCDS_HOSTNAME=surftimer_100t
+      - SRCDS_STARTMAP=${SRCDS_STARTMAP:-surf_utopia_njv}
+    volumes:
+      - ./data:/home/steam/csgo-dedicated
