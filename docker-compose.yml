@@ -27,5 +27,4 @@ services:
       - SRCDS_STARTMAP=surf_lavaflow
     volumes:
       - ./data:/home/steam/csgo-dedicated
-      - ./data-test:/home/surf/csgo
 
