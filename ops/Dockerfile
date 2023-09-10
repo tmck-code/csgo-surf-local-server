@@ -22,3 +22,13 @@ ADD ops/plugins/csgo_movement_unlocker/csgo_movement_unlocker.games.txt addons/s
 # https://forums.alliedmods.net/showthread.php?t=301075
 ADD ops/plugins/ramp_slope_fix/ramp_slope_fix.smx addons/sourcemod/plugins/
 ADD ops/plugins/ramp_slope_fix/ramp_slope_fix.games.txt addons/sourcemod/gamedata/
+
+# install databases config file
+ADD ops/configs/databases.cfg addons/sourcemod/configs/
+# install mapchooser config file
+ADD ops/configs/st-mapchooser.cfg cfg/sourcemod/
+
+# install surftimer cfg
+ADD ops/configs/server/64t/surftimer.cfg cfg/
+# install custom surf server cfg
+ADD ops/configs/server/64t/surf_server.cfg cfg/
