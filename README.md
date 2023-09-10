@@ -24,11 +24,20 @@ SRCDS_TICKRATE=100 docker-compose up
 
 ## TODO
 
-- [ ] create separate cfg/docker-compose definitions for 64/85/100 tick rates
+- [x] create separate cfg/docker-compose definitions for 64/85/100 tick rates
 - [ ] get all plugins working
   - [ ] ramp fix
   - [x] movement unlocker working
+  - [ ] map chooser, with config
 - [ ] account for all required cfg files, add to ops/configs and mount them correctly
+
+## Debug commands
+
+### The rcon utility
+
+```shell
+./ops/rcon_command 'sm plugins list'
+```
 
 ## Additional Config
 
