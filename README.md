@@ -8,8 +8,7 @@
 ---
 
 - [csgo-surf-local-server](#csgo-surf-local-server)
-  - [bootstrapping](#bootstrapping)
-  - [running](#running)
+  - [commands](#commands)
   - [TODO](#todo)
   - [Debug commands](#debug-commands)
     - [The rcon utility](#the-rcon-utility)
@@ -21,26 +20,18 @@
 
 ---
 
-## bootstrapping
-
-Bootstrapping/building this will
-
-1. build the base docker image containing all dependencies
-    1. including an initial csgo dir
-    2. with all the git plugin dirs in the correct location
-2. run a mysql container bind-mounted to the host, and mysql database/tables required for SurfTimer
-3. run a container using the base image, which copies the csgo dir out onto the host
-    1. this copies/overrides any cfgs etc. from the ops/configs dir
-4. run everything with docker-compose up
-
-## running
+## commands
 
 ```shell
-# for a regular 64 tick server
-docker-compose up
+# create a new csgo config directory (data/) inside the repository
+make bootstrap
 
-# for a 100 tick server
-SRCDS_TICKRATE=100 docker-compose up
+# run a 64 tick server using the data/ directory (or any existing csgo dir)
+make serve-64t
+
+# run a 100 tick server using the data/ directory (or any existing csgo dir)
+# this uses a separate DB to 64 tick server to preserve your records
+make serve-100t
 ```
 
 ## TODO

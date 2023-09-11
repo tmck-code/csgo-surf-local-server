@@ -7,7 +7,7 @@ RUN apt update \
 
 ENV SURFTIMER_ZIP https://github.com/surftimer/SurfTimer/releases/download/1.1.4/SurfTimer.1.1.4.914.6a563cd.SM1.11.zip
 WORKDIR /tmp
-RUN curl -L $SURFTIMER_ZIP -o surftimer.zip
+RUN curl -L $SURFTIMER_ZIP -o surftimer.zip \
     && unzip surftimer.zip -d /home/steam/csgo-dedicated/csgo/ \
     && rm surftimer.zip
 
@@ -24,9 +24,9 @@ ADD ops/plugins/ramp_slope_fix/ramp_slope_fix.smx addons/sourcemod/plugins/
 ADD ops/plugins/ramp_slope_fix/ramp_slope_fix.games.txt addons/sourcemod/gamedata/
 
 # install databases config file
-ADD ops/configs/databases.cfg addons/sourcemod/configs/
+ADD ops/configs/server/databases.cfg addons/sourcemod/configs/
 # install mapchooser config file
-ADD ops/configs/st-mapchooser.cfg cfg/sourcemod/
+ADD ops/configs/server/st-mapchooser.cfg cfg/sourcemod/
 
 # install surftimer cfg
 ADD ops/configs/server/64t/surftimer.cfg cfg/
