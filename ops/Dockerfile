@@ -11,7 +11,10 @@ RUN curl -L $SURFTIMER_ZIP -o surftimer.zip \
     && unzip surftimer.zip -d /home/steam/csgo-dedicated/csgo/ \
     && rm surftimer.zip
 
+
 WORKDIR /home/steam/csgo-dedicated/csgo/
+
+RUN git clone https://github.com/Sayt123/SurfZones
 
 # install updated files for the "csgo_movement_unlocker" plugin
 # (get >260 speed when sliding on ground for prestrafe)
