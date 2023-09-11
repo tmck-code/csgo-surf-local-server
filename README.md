@@ -1,5 +1,26 @@
 # csgo-surf-local-server
 
+> _A local CSGO SurfTimer™ server in docker_
+
+- This repository contains the tools to run a local CSGO SurfTimer™ server in docker.
+- This can bootstrap a new one with all the required dependencies. or using an existing `csgo` directory.
+
+---
+
+- [csgo-surf-local-server](#csgo-surf-local-server)
+  - [bootstrapping](#bootstrapping)
+  - [running](#running)
+  - [TODO](#todo)
+  - [Debug commands](#debug-commands)
+    - [The rcon utility](#the-rcon-utility)
+  - [Additional Config](#additional-config)
+    - [`surf_server.cfg`](#surf_servercfg)
+    - [The "Ramp Glitch" Fix](#the-ramp-glitch-fix)
+    - [HUD Speedometer](#hud-speedometer)
+    - [CSGO Movement Unlocker](#csgo-movement-unlocker)
+
+---
+
 ## bootstrapping
 
 Bootstrapping/building this will
