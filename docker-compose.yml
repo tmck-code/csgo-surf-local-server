@@ -18,7 +18,7 @@ services:
       - SRCDS_HOSTNAME=surftimer_64t
       - SRCDS_STARTMAP=${SRCDS_STARTMAP:-surf_utopia_njv}
     volumes:
-      - ./csgo:/home/steam/csgo-dedicated
+      - ./csgo:/home/steam/csgo-dedicated/csgo
     depends_on:
       - surftimer-64t-db
 
@@ -38,7 +38,7 @@ services:
       - SRCDS_HOSTNAME=surftimer_100t
       - SRCDS_STARTMAP=${SRCDS_STARTMAP:-surf_utopia_njv}
     volumes:
-      - ./csgo:/home/steam/csgo-dedicated
+      - ./csgo:/home/steam/csgo-dedicated/csgo
     depends_on:
       - surftimer-100t-db
 
