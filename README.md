@@ -14,10 +14,13 @@
     - [The rcon utility](#the-rcon-utility)
   - [Additional Config](#additional-config)
     - [`surf_server.cfg`](#surf_servercfg)
+    - [The GSLT token](#the-gslt-token)
 
 ---
 
 ## commands
+
+> Before running the server, you'll need a GSLT token (see [The GSLT token](#the-gslt-token))
 
 ```shell
 # create a new csgo config directory (data/) and mysql data directory
@@ -36,10 +39,9 @@ make serve-100t
 
 - [x] create separate cfg/docker-compose definitions for 64/85/100 tick rates
 - [ ] get all plugins working
-  - [ ] ramp fix
+  - [x] ramp fix
   - [x] movement unlocker working
   - [ ] map chooser, with config
-- [ ] account for all required cfg files, add to ops/configs and mount them correctly
 
 ## Debug commands
 
@@ -56,3 +58,9 @@ make serve-100t
 > see `config/surf_server.cfg`
 
 This CFG file contains all of the required vars to make surf work.
+
+### The GSLT token
+
+The GSLT token is required to run the server. The Makefile (and docker-compose) expects this to be accessible via the environment variable `CSGO_GSLT`
+
+In order to create a GSLT token, navigate to this page, login and follow the prompts to create a game server account and token: https://steamcommunity.com/dev/managegameservers
