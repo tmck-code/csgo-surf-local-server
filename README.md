@@ -28,11 +28,11 @@
 DB_PASSWORD=psswd make bootstrap
 
 # run a 64 tick server using the data/ directory (or any existing csgo dir)
-make serve-64t
+CSGO_GSLT=your_token_here make serve-64t
 
 # run a 100 tick server using the data/ directory (or any existing csgo dir)
 # this uses a separate DB to 64 tick server to preserve your records
-make serve-100t
+CSGO_GSLT=your_token_here make serve-100t
 ```
 
 ## TODO
