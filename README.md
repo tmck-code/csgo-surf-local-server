@@ -20,7 +20,8 @@
 ## commands
 
 ```shell
-# create a new csgo config directory (data/) inside the repository
+# create a new csgo config directory (data/) and mysql data directory
+# (mysql_64t) inside the repository
 make bootstrap
 
 # run a 64 tick server using the data/ directory (or any existing csgo dir)
