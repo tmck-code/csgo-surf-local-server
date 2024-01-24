@@ -15,6 +15,7 @@
   - [Additional Config](#additional-config)
     - [`surf_server.cfg`](#surf_servercfg)
     - [The GSLT token](#the-gslt-token)
+  - [Resources](#resources)
 
 ---
 
@@ -64,3 +65,7 @@ This CFG file contains all of the required vars to make surf work.
 The GSLT token is required to run the server. The Makefile (and docker-compose) expects this to be accessible via the environment variable `CSGO_GSLT`
 
 In order to create a GSLT token, navigate to this page, login and follow the prompts to create a game server account and token: https://steamcommunity.com/dev/managegameservers
+
+## Resources
+
+- There's an excellent community developer guide for CSGO dedicated servers: https://developer.valvesoftware.com/wiki/Counter-Strike:_Global_Offensive/Dedicated_Servers
