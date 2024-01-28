@@ -80,13 +80,12 @@ def download_map(driver, map_url):
 
     # find the download button and click it
     map_download_url = soup.find('a', {'title': 'Download'})['href']
-    ppd({'map_download_url': map_download_url}, indent=None)
     xpath = '/html/body/div[2]/section/div/div[1]/div/div/div/div[1]/div/h2/a'
     driver.execute_script(
       'arguments[0].click();',
       WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.XPATH, xpath))),
     )
-    ppd({'msg': 'file download started', 'map_download_url': map_download_url})
+    ppd({'msg': 'file download started', 'map_url': map_url})
 
     soup = BeautifulSoup(driver.page_source, 'html.parser')
     heading = soup.find('h1')
@@ -167,15 +166,15 @@ def run(csgo_map_dir):
     local_maps = list(find_local_maps(csgo_map_dir))
 
     print(create_table(servers))
+
+    todo = [server for server in servers if server['map']['name'] not in local_maps]
     input('press enter to download')
-    # count downloaded/exists
+
+
+# count downloaded/exists
     counts = defaultdict(list)
-    for i, server in enumerate(servers):
+    for i, server in enumerate(todo):
         ppd({'msg': 'checking server map', 'map': server['map']['name'], 'i': i, 'total': len(servers)})
-        if server['map']['name'] in local_maps:
-            ppd({'msg': 'map already downloaded', 'map': server['map']['name']})
-            counts['exists'].append(server['map']['name'])
-            continue
 
         bzip_fpath = download_map(driver, server['map']['url'])
         fpath = bzip2_decompress(bzip_fpath)
