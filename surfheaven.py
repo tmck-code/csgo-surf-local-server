@@ -15,6 +15,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+import tabulate
 
 SERVER_LIST_URL = 'https://surfheaven.eu/servers'
 
@@ -143,17 +144,34 @@ def init_browser():
     return webdriver.Chrome(options=options)
 
 
+def server_to_row(server):
+    return [
+        server['name'],
+        server['host'],
+        server['map']['name'],
+        server['map']['tier'],
+        server['map']['stage_type'],
+        server['map']['url'],
+    ]
+
+def create_table(servers):
+    return tabulate.tabulate(
+        [server_to_row(server) for server in servers],
+        headers=['name', 'host', 'map', 'tier', 'stage_type', 'url'],
+        tablefmt='fancy_grid',
+    )
+
 def run(csgo_map_dir):
     driver = init_browser()
     servers = list(list_current_servers(driver))
     local_maps = list(find_local_maps(csgo_map_dir))
 
-    ppd(servers)
+    print(create_table(servers))
+    input('press enter to download')
     # count downloaded/exists
     counts = defaultdict(list)
     for i, server in enumerate(servers):
         ppd({'msg': 'checking server map', 'map': server['map']['name'], 'i': i, 'total': len(servers)})
-        ppd(server, indent=2)
         if server['map']['name'] in local_maps:
             ppd({'msg': 'map already downloaded', 'map': server['map']['name']})
             counts['exists'].append(server['map']['name'])
@@ -167,9 +185,11 @@ def run(csgo_map_dir):
 
         for fpath in {bzip_fpath, fpath}:
             os.remove(fpath)
+    driver.close()
+
     ppd(counts, indent=2)
 
-    driver.close()
+
 
 if __name__ == '__main__':
     run(csgo_map_dir=sys.argv[1])
