@@ -1,4 +1,9 @@
 #!/bin/bash
+
+# This file has been entirely lifted from
+# https://github.com/CM2Walki/CSGO/blob/master/bullseye/etc/entry.sh
+# See the lines marked with # BUG for the changes I've made to get it to work
+
 mkdir -p "${STEAMAPPDIR}" || true
 
 bash "${STEAMCMDDIR}/steamcmd.sh" +force_install_dir "${STEAMAPPDIR}" \
@@ -51,7 +56,9 @@ sv_password	+sv_password "${SRCDS_PW}"
 rcon_password	+rcon_password "${SRCDS_RCONPW}"
 EOM
 	# if autoexec is present, drop overwritten arguments here (example: SRCDS_PW & SRCDS_RCONPW)
-	# bash "${STEAMAPPDIR}/srcds_run" -game "${STEAMAPP}" -console -autoupdate -norestart \
+
+	# BUG: prevent infinite restart loop by removing -autoupdate and adding -norestart
+	# bash "${STEAMAPPDIR}/srcds_run" -game "${STEAMAPP}" -console -autoupdate \
 	bash "${STEAMAPPDIR}/srcds_run" -game "${STEAMAPP}" -console -norestart \
 				-steam_dir "${STEAMCMDDIR}" \
 				-steamcmd_script "${HOMEDIR}/${STEAMAPP}_update.txt" \
@@ -78,7 +85,8 @@ EOM
 				"${ADDITIONAL_ARGS}"
 else
 	# If no autoexec is present, use all parameters
-	# bash "${STEAMAPPDIR}/srcds_run" -game "${STEAMAPP}" -console -autoupdate -norestart \
+	# BUG: prevent infinite restart loop by removing -autoupdate and adding -norestart
+	# bash "${STEAMAPPDIR}/srcds_run" -game "${STEAMAPP}" -console -autoupdate \
 	bash "${STEAMAPPDIR}/srcds_run" -game "${STEAMAPP}" -console -norestart \
 				-steam_dir "${STEAMCMDDIR}" \
 				-steamcmd_script "${HOMEDIR}/${STEAMAPP}_update.txt" \
