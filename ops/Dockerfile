@@ -7,7 +7,8 @@ RUN apt update \
 
 USER steam
 
-ENV SURFTIMER_ZIP https://github.com/surftimer/SurfTimer/releases/download/1.1.4/SurfTimer.1.1.4.914.6a563cd.SM1.11.zip
+# Download the most recent version of the surftimer:dev branch (https://github.com/surftimer/SurfTimer/archive/refs/heads/dev.zip)
+ENV SURFTIMER_ZIP https://github.com/surftimer/SurfTimer/archive/b9c860942b8a55b7e36c244264f53c4e6d13a32b.zip
 WORKDIR /tmp
 RUN curl -L $SURFTIMER_ZIP -o surftimer.zip \
     && unzip surftimer.zip -d /home/steam/csgo-dedicated/csgo/ \
