@@ -1,4 +1,12 @@
 #!/usr/bin/env python3
+'''
+Visits the SurfHeaven server page, looks at the AU servers, finds any maps that are not 
+already in the local maps dir and downloads/unzips/copies them to the local dir.
+
+Usage:
+./ops/scripts/surfheaven.py \
+    /some/location/SteamLibrary/steamapps/common/Counter-Strike\ Global\ Offensive/csgo/maps/
+'''
 
 import bz2
 import glob
