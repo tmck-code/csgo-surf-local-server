@@ -11,8 +11,10 @@ USER steam
 ENV SURFTIMER_ZIP https://github.com/surftimer/SurfTimer/archive/b9c860942b8a55b7e36c244264f53c4e6d13a32b.zip
 WORKDIR /tmp
 RUN curl -L $SURFTIMER_ZIP -o surftimer.zip \
-    && unzip surftimer.zip -d /home/steam/csgo-dedicated/csgo/ \
-    && rm surftimer.zip
+    && unzip surftimer.zip -d /tmp/ \
+    && mkdir /home/steam/csgo-dedicated/csgo \
+    && mv -v /tmp/SurfTimer*/* /home/steam/csgo-dedicated/csgo/ \
+    && rm -r surftimer.zip /tmp/SurfTimer*
 
 WORKDIR /home/steam/csgo-dedicated/csgo/
 
