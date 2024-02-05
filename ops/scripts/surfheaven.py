@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 '''
-Visits the SurfHeaven server page, looks at the AU servers, finds any maps that are not 
+Visits the SurfHeaven server page, looks at the AU servers, finds any maps that are not
 already in the local maps dir and downloads/unzips/copies them to the local dir.
 
 Usage:
@@ -37,7 +37,7 @@ def ppd(d, indent=None, style='material'):
     print(highlight(json.dumps(d, indent=indent), JsonLexer(), Formatter(style=get_style_by_name(style))).strip())
 
 def wait_for_download(download_dir):
-    time.sleep(2)
+    time.sleep(0.1)
     pending_fpath = glob.glob('*.crdownload')[0]
     while True:
         if os.path.exists(pending_fpath):
@@ -49,7 +49,7 @@ def wait_for_download(download_dir):
             break
     return pending_fpath.removesuffix('.crdownload')
 
-def get_map_info(soup):
+def parse_map_info(soup):
     info = {}
     # {
     #   "Completions": 313,
@@ -64,7 +64,7 @@ def get_map_info(soup):
         if k == '':
             info['stage_type'] = v
         else:
-            info[k] = int(v)
+            info[k.lower()] = int(v)
     # {
     #   "author": "Spy Complex",
     #   "added": "2021-07-12"
@@ -78,13 +78,17 @@ def get_map_info(soup):
     return info
 
 
-def download_map(driver, map_url):
+def get_map_info(driver, map_url):
     driver.get(map_url)
-    ppd({'msg': 'fetching map URL', 'map_url': map_url})
     soup = BeautifulSoup(driver.page_source, 'html.parser')
 
-    info = get_map_info(soup)
-    ppd(info, indent=2)
+    info = parse_map_info(soup)
+    return info
+
+
+def download_map(driver, map_url):
+    driver.get(map_url)
+    soup = BeautifulSoup(driver.page_source, 'html.parser')
 
     # find the download button and click it
     map_download_url = soup.find('a', {'title': 'Download'})['href']
@@ -159,12 +163,16 @@ def server_to_row(server):
         server['map']['tier'],
         server['map']['stage_type'],
         server['map']['url'],
+        f"{server['map']['completions']:,d}",
+        f"{server['map']['times played']:,d}",
+        server['map']['author'],
+        server['map']['added'],
     ]
 
 def create_table(servers):
     return tabulate.tabulate(
         [server_to_row(server) for server in servers],
-        headers=['name', 'host', 'map', 'tier', 'stage_type', 'url'],
+        headers=['name', 'host', 'map', 'tier', 'stage_type', 'url', 'completions', 'times played', 'author', 'added'],
         tablefmt='fancy_grid',
     )
 
@@ -173,17 +181,23 @@ def run(csgo_map_dir):
     servers = list(list_current_servers(driver))
     local_maps = list(find_local_maps(csgo_map_dir))
 
-    print(create_table(servers))
+    # print(create_table(servers))
 
     todo = [server for server in servers if server['map']['name'] not in local_maps]
-    input('press enter to download')
 
-
-# count downloaded/exists
-    counts = defaultdict(list)
     for i, server in enumerate(todo):
         ppd({'msg': 'checking server map', 'map': server['map']['name'], 'i': i, 'total': len(servers)})
 
+        info = get_map_info(driver, server['map']['url'])
+        todo[i]['map'].update(info)
+        ppd(info, indent=2)
+
+    print(create_table(todo))
+    input('press enter to download')
+
+    # count downloaded/exists
+    counts = defaultdict(list)
+    for i, server in enumerate(todo):
         bzip_fpath = download_map(driver, server['map']['url'])
         fpath = bzip2_decompress(bzip_fpath)
         shutil.copy(fpath, csgo_map_dir)
