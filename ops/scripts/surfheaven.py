@@ -167,13 +167,14 @@ def server_to_row(server):
         f"{server['map']['times played']:,d}",
         server['map']['author'],
         server['map']['added'],
+        server['local']
     ]
 
 def create_table(servers):
     return tabulate.tabulate(
         [server_to_row(server) for server in servers],
-        headers=['name', 'host', 'map', 'tier', 'stage_type', 'url', 'completions', 'times played', 'author', 'added'],
-        tablefmt='fancy_grid',
+        headers=['name', 'host', 'map', 'tier', 'stage_type', 'url', 'completions', 'times played', 'author', 'added', 'local'],
+        tablefmt='rounded_grid',
     )
 
 def run(csgo_map_dir):
@@ -181,23 +182,25 @@ def run(csgo_map_dir):
     servers = list(list_current_servers(driver))
     local_maps = list(find_local_maps(csgo_map_dir))
 
-    # print(create_table(servers))
-
-    todo = [server for server in servers if server['map']['name'] not in local_maps]
-
-    for i, server in enumerate(todo):
+    for i, server in enumerate(servers):
         ppd({'msg': 'checking server map', 'map': server['map']['name'], 'i': i, 'total': len(servers)})
 
         info = get_map_info(driver, server['map']['url'])
-        todo[i]['map'].update(info)
+        servers[i]['map'].update(info)
+        if server['map']['name'] in local_maps:
+            servers[i]['local'] = '✓'
+        else:
+            servers[i]['local'] = '✗'
         ppd(info, indent=2)
 
-    print(create_table(todo))
+    print(create_table(servers))
     input('press enter to download')
 
     # count downloaded/exists
     counts = defaultdict(list)
-    for i, server in enumerate(todo):
+    for i, server in enumerate(servers):
+        if server['local'] == '✓':
+            continue
         bzip_fpath = download_map(driver, server['map']['url'])
         fpath = bzip2_decompress(bzip_fpath)
         shutil.copy(fpath, csgo_map_dir)
