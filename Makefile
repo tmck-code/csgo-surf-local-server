@@ -8,9 +8,10 @@ plugin/bootstrap:
 	docker rm -f csgo-surf
 
 db/bootstrap:
-	# docker-compose up -d surftimer-64t
-	# TODO: implement a health-check here
-	# sleep 20
+	docker-compose up -d surftimer-64t
+	# wait for the database to be ready
+	until mysqladmin status -h 127.0.0.1 -u root -ppsswd; do sleep 1; done
+	# bootstrap the database
 	docker exec -it surftimer-64t bash -c "mysql -u root -h 127.0.0.1 --password=$(DB_PASSWORD) surftimer < /home/steam/csgo-dedicated/csgo/scripts/mysql-files/fresh_install.sql"
 	docker exec -it surftimer-64t bash -c "mysql -u root -h 127.0.0.1 --password=$(DB_PASSWORD) surftimer < /home/steam/csgo-dedicated/csgo/SurfZones/Zones/REPLACE_ALL_maptier.sql"
 	docker exec -it surftimer-64t bash -c "mysql -u root -h 127.0.0.1 --password=$(DB_PASSWORD) surftimer < /home/steam/csgo-dedicated/csgo/SurfZones/Zones/REPLACE_ALL_spawnlocations.sql"
