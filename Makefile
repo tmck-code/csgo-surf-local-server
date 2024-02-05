@@ -4,7 +4,7 @@ build:
 plugin/bootstrap:
 	docker rm -f csgo-surf
 	docker create --name csgo-surf surftimer
-	docker cp csgo-surf:/home/steam/csgo-dedicated/csgo ./csgo-plugin-data
+	docker cp csgo-surf:/home/steam/csgo-dedicated/ ./csgo-data
 	docker rm -f csgo-surf
 
 db/bootstrap:
