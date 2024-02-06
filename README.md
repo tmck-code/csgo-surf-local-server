@@ -11,6 +11,7 @@
   - [TODO](#todo)
   - [setting up the server](#setting-up-the-server)
     - [bootstrap commands](#bootstrap-commands)
+    - [the bootstrap explained](#the-bootstrap-explained)
     - [admin users](#admin-users)
   - [Admin \& Debug commands](#admin--debug-commands)
     - [The rcon utility](#the-rcon-utility)
@@ -39,20 +40,41 @@
 ```shell
 # create a new csgo config directory (csgo-data/) and mysql data directory
 # (mysql_64t) inside the repository
-DB_PASSWORD=psswd make bootstrap
+DB_PASSWORD=YOUR_PASSWORD make bootstrap
 
 # run a 64 tick server using the data/ directory (or any existing csgo dir)
-CSGO_GSLT=your_token_here make serve-64t
+CSGO_GSLT=YOUR_TOKEN make serve-64t
 
 # run a 100 tick server using the data/ directory (or any existing csgo dir)
 # this uses a separate DB to 64 tick server to preserve your records
-CSGO_GSLT=your_token_here make serve-100t
+CSGO_GSLT=YOUR_TOKEN make serve-100t
 ```
+
+### the bootstrap explained
+
+There are a few distinct stages that occur in order to get everything in place
+
+1. Building the Dockerfile
+   1. This is based off the image `cm2network/csgo:sourcemod`, which comes with all the dependencies to run a CSGO server, and sourcemod.
+   2. This Dockerfile fetches all of the required plugins, including but not limited to
+     - [SurfTimer](https://github.com/surftimer/SurfTimer)
+     - [SurfZones](https://github.com/Sayt123/SurfZones)
+     - CSGO movement unlocker (ground sliding for prestrafe)
+     - Ramp Slope Fix (ramp bug fix)
+2. Copying the CSGO directory from the Docker image -> your local machine.
+   1. The CSGO directory in the docker image contains all of the required plugins in the correct location
+   2. Pulling this into your local machine allows easy file access & backups
+3. Bootstrap the MySQL database with the zones
+   1. The SurfTimer plugin needs zone coordinates and WR times in order to function properly!
+   2. These sql files were downloaded during the docker build, copied to the local machine, and then bind-mounted for running
+4. Tweak configs
+   1. Set up admin users
+   2. Adjust server cfg file
+   3. Update the `databases`
 
 ### admin users
 
 > There is an excelled community wiki here that details adding admins: https://wiki.alliedmods.net/Adding_Admins_(SourceMod)
-
 
 When you launch the server you'll find that you can't run `!zone` or similar commands, as there aren't any admins configured.
 
@@ -124,3 +146,5 @@ Other than that on linear maps like this you also would want to add a few Checkp
   - https://github.com/Sayt123/SurfZones/pull/2#issuecomment-1630978597
 - How to run CSGO via Steam on Linux
   - https://github.com/ValveSoftware/csgo-osx-linux/issues/3291#issuecomment-1741956737
+- Community wiki for adding admins
+  - https://wiki.alliedmods.net/Adding_Admins_(SourceMod)
