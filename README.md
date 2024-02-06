@@ -5,6 +5,11 @@
 - This repository contains the tools to run a local CSGO SurfTimer™ server in docker.
 - This can bootstrap a new one with all the required dependencies. or using an existing `csgo` directory.
 
+This project stands on the shoulders of giants, namely
+
+- [SurfTimer](https://github.com/surftimer/SurfTimer)
+- [SurfZones](https://github.com/Sayt123/SurfZones)
+
 ---
 
 - [csgo-surf-local-server](#csgo-surf-local-server)
