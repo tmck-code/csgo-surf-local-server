@@ -6,7 +6,7 @@ from rcon.source import Client
 
 
 def send_command(command: str):
-    with Client('127.0.0.1', 27015, passwd=RCON_PASSWORD) as client:
+    with Client(os.environ.get('RCON_HOST', '127.0.0.1'), 27015, passwd=RCON_PASSWORD) as client:
         response = client.run(command)
     return response
 
