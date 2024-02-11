@@ -37,11 +37,12 @@ def ppd(d, indent=None, style='material'):
     print(highlight(json.dumps(d, indent=indent), JsonLexer(), Formatter(style=get_style_by_name(style))).strip())
 
 def wait_for_download(download_dir):
+    start_time = datetime.now()
     time.sleep(0.1)
     pending_fpath = glob.glob('*.crdownload')[0]
     while True:
         if os.path.exists(pending_fpath):
-            ppd({'msg': 'downloading', 'pending_fpath': pending_fpath})
+            ppd({'msg': 'downloading', 'pending_fpath': pending_fpath, 'elapsed': (datetime.now() - start_time).total_seconds()})
             time.sleep(3)
             continue
         else:
