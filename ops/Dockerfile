@@ -1,22 +1,24 @@
-FROM cm2network/csgo:sourcemod
+FROM timche/csgo:sourcemod
 
 USER root
 
 RUN apt update \
-    && apt install -y git unzip default-mysql-client
+    && apt install --no-install-recommends -y \
+        git unzip default-mysql-client curl
 
-USER steam
+USER csgo
+ENV CSGO_DIR /home/csgo/server/csgo/
 
 # Download the most recent version of the surftimer:dev branch (https://github.com/surftimer/SurfTimer/archive/refs/heads/dev.zip)
 ENV SURFTIMER_ZIP https://github.com/surftimer/SurfTimer/archive/b9c860942b8a55b7e36c244264f53c4e6d13a32b.zip
 WORKDIR /tmp
 RUN curl -L $SURFTIMER_ZIP -o surftimer.zip \
     && unzip surftimer.zip -d /tmp/ \
-    && mkdir /home/steam/csgo-dedicated/csgo \
-    && mv -v /tmp/SurfTimer*/* /home/steam/csgo-dedicated/csgo/ \
+    && mkdir $CSGO_DIR \
+    && mv -v /tmp/SurfTimer*/* $CSGO_DIR \
     && rm -r surftimer.zip /tmp/SurfTimer*
 
-WORKDIR /home/steam/csgo-dedicated/csgo/
+WORKDIR $CSGO_DIR
 
 RUN git clone https://github.com/Sayt123/SurfZones
 
@@ -42,4 +44,5 @@ ADD ops/configs/server/64t/surf_server.cfg cfg/
 
 ADD ops/entry.sh /home/steam/
 
-WORKDIR /home/steam/
+WORKDIR /home/csgo
+
