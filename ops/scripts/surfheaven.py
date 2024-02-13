@@ -17,6 +17,7 @@ import sys
 import shutil
 import time
 from collections import Counter, defaultdict
+from datetime import datetime
 
 from bs4 import BeautifulSoup
 from selenium import webdriver
@@ -42,7 +43,7 @@ def wait_for_download(download_dir):
     pending_fpath = glob.glob('*.crdownload')[0]
     while True:
         if os.path.exists(pending_fpath):
-            ppd({'msg': 'downloading', 'pending_fpath': pending_fpath, 'elapsed': (datetime.now() - start_time).total_seconds()})
+            ppd({'msg': 'downloading', 'pending_fpath': pending_fpath, 'elapsed': str(datetime.now() - start_time), 'size': f'{os.path.getsize(pending_fpath)/(1024*1024):.02f} MB'})
             time.sleep(3)
             continue
         else:
@@ -104,6 +105,7 @@ def download_map(driver, map_url):
     heading = soup.find('h1')
     if heading is not None and heading.get_text() == '404 Not Found':
         print({'404 error': map_download_url})
+        return
     else:
         fpath = wait_for_download('.')
     return fpath
@@ -203,6 +205,8 @@ def run(csgo_map_dir):
         if server['local'] == '✓':
             continue
         bzip_fpath = download_map(driver, server['map']['url'])
+        if bzip_fpath is None:
+            continue
         fpath = bzip2_decompress(bzip_fpath)
         shutil.copy(fpath, csgo_map_dir)
         counts['downloaded'].append(server['map']['name'])
