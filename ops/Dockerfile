@@ -42,7 +42,5 @@ ADD ops/configs/server/64t/surftimer.cfg cfg/
 # install custom surf server cfg
 ADD ops/configs/server/64t/surf_server.cfg cfg/
 
-ADD ops/entry.sh /home/steam/
-
 WORKDIR /home/csgo
 
