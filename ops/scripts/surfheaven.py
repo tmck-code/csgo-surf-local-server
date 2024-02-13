@@ -8,15 +8,10 @@ Usage:
     /some/location/SteamLibrary/steamapps/common/Counter-Strike\ Global\ Offensive/csgo/maps/
 '''
 
-import bz2
-import glob
-import json
-import os
-import re
-import sys
-import shutil
+from argparse import ArgumentParser
+import bz2, json
+import os, sys, glob, shutil, re
 import time
-from collections import Counter, defaultdict
 from datetime import datetime
 
 from bs4 import BeautifulSoup
@@ -29,48 +24,37 @@ import tabulate
 SERVER_LIST_URL = 'https://surfheaven.eu/servers'
 
 # OTT pretty-printing code ----------------------
-from pygments import highlight
-from pygments.lexers import JsonLexer
-from pygments.formatters import TerminalTrueColorFormatter as Formatter
-from pygments.styles import get_style_by_name
-
+from pygments import lexers, formatters, styles, highlight
 def ppd(d, indent=None, style='material'):
-    print(highlight(json.dumps(d, indent=indent), JsonLexer(), Formatter(style=get_style_by_name(style))).strip())
+    'pretty-prints a dictionary, used for simple logs'
+    print(highlight(json.dumps(d, indent=indent), lexers.JsonLexer(), formatters.TerminalTrueColorFormatter(style=styles.get_style_by_name(style))).strip())
 
 def wait_for_download(download_dir):
+    'finds the first .crdownload file and waits for it to finish downloading (aka disappear)'
     start_time = datetime.now()
     time.sleep(0.1)
     pending_fpath = glob.glob('*.crdownload')[0]
     while True:
         if os.path.exists(pending_fpath):
-            ppd({'msg': 'downloading', 'pending_fpath': pending_fpath, 'elapsed': str(datetime.now() - start_time), 'size': f'{os.path.getsize(pending_fpath)/(1024*1024):.02f} MB'})
+            ppd({'msg': 'downloading', 'pending_fpath': pending_fpath, 'elapsed': str(datetime.now() - start_time), 'size': f'{os.path.getsize(pending_fpath)/(1024*1024):.02f} MB'}, style='paraiso-dark')
             time.sleep(3)
             continue
         else:
-            ppd({'msg': 'downloaded', 'pending_fpath': pending_fpath.removesuffix('.crdownload')})
+            ppd({'msg': 'downloaded', 'downloaded_fpath': pending_fpath.removesuffix('.crdownload')})
             break
     return pending_fpath.removesuffix('.crdownload')
 
 def parse_map_info(soup):
+    'Parse the surfheaven map page html into a dictionary'
     info = {}
-    # {
-    #   "Completions": 313,
-    #   "Times Played": 295,
-    #   "Tier": 3,
-    #   "stage_type": "Staged",
-    #   "Bonus": 4,
-    #   "Stage": 12
-    # }
+    # { "Completions": 313, "Times Played": 295, "Tier": 3, "stage_type": "Staged", "Bonus": 4, "Stage": 12 }
     for i, el in enumerate(soup.find('table').find_all('td')):
         _, v, k = [e.get_text(strip=True) for e in el.contents]
         if k == '':
             info['stage_type'] = v
         else:
             info[k.lower()] = int(v)
-    # {
-    #   "author": "Spy Complex",
-    #   "added": "2021-07-12"
-    # }
+    # { "author": "Spy Complex", "added": "2021-07-12" }
     for el in soup.find('div', {'class': 'media'}).find('p').contents:
         row = el.get_text(strip=True)
         if row.startswith('Author:'):
@@ -81,6 +65,7 @@ def parse_map_info(soup):
 
 
 def get_map_info(driver, map_url):
+    'Visits the map page and returns the map info'
     driver.get(map_url)
     soup = BeautifulSoup(driver.page_source, 'html.parser')
 
@@ -89,6 +74,7 @@ def get_map_info(driver, map_url):
 
 
 def download_map(driver, map_url):
+    'Visits the map page, clicks the download button and waits for the file to download'
     driver.get(map_url)
     soup = BeautifulSoup(driver.page_source, 'html.parser')
 
@@ -111,6 +97,7 @@ def download_map(driver, map_url):
     return fpath
 
 def list_current_servers(driver):
+    'Visits the server list page and parses the info of the AU servers'
     driver.get(SERVER_LIST_URL)
     soup = BeautifulSoup(driver.page_source, 'html.parser')
 
@@ -133,12 +120,14 @@ def list_current_servers(driver):
         }
 
 def find_local_maps(csgo_map_dir):
+    'Yields the names of the maps in the CSGO maps directory'
     for fpath in glob.glob(os.path.join(csgo_map_dir, '*.bsp')):
         # yield the filename without the extension,
         # e.g. 'surf_utopia_njv.bsp' -> 'surf_utopia_njv
         yield os.path.basename(os.path.splitext(fpath)[0])
 
 def bzip2_decompress(fpath):
+    'Decompresses a .bz2 file and returns the path to the decompressed file'
     # files might not be compressed
     if not fpath.endswith('.bz2'):
         return fpath
@@ -146,19 +135,19 @@ def bzip2_decompress(fpath):
         ostream.write(istream.read())
     return fpath.removesuffix('.bz2')
 
-def init_browser():
+def init_browser(download_dir):
+    'Initialises a headless chrome browser'
     options = webdriver.ChromeOptions()
     options.add_argument('--headless')
     options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
-    options.add_experimental_option('prefs', {'download.default_directory': os.getcwd()})
-
-    ppd({'msg': 'using download directory', 'directory': os.getcwd()})
+    options.add_experimental_option('prefs', {'download.default_directory': download_dir})
 
     return webdriver.Chrome(options=options)
 
 
 def server_to_row(server):
+    'Converts a server dictionary to a row for the table'
     return [
         server['name'],
         server['host'],
@@ -174,51 +163,80 @@ def server_to_row(server):
     ]
 
 def create_table(servers):
+    'Creates a table from the server list'
     return tabulate.tabulate(
-        [server_to_row(server) for server in servers],
+        list(map(server_to_row, servers)),
         headers=['name', 'host', 'map', 'tier', 'stage_type', 'url', 'completions', 'times played', 'author', 'added', 'local'],
         tablefmt='rounded_grid',
     )
 
-def run(csgo_map_dir):
-    driver = init_browser()
-    servers = list(list_current_servers(driver))
+def run(csgo_map_dir, download_dir='.', interactive=True):
+    'Visits the server list page, fetches the map info, downloads any maps that are not already in the local dir'
+
+    ppd({'msg': 'initialising browser', 'download_dir': download_dir, 'csgo_map_dir': csgo_map_dir, 'interactive': interactive})
+    driver = init_browser(download_dir=os.getcwd())
+
     local_maps = list(find_local_maps(csgo_map_dir))
+    ppd({'msg': 'found local maps', 'n_maps': len(local_maps), 'map_dir': csgo_map_dir})
 
-    for i, server in enumerate(servers):
-        ppd({'msg': 'checking server map', 'map': server['map']['name'], 'i': i, 'total': len(servers)})
+    ppd({'msg': 'fetching current server list', 'url': SERVER_LIST_URL})
+    servers = list(list_current_servers(driver))
 
-        info = get_map_info(driver, server['map']['url'])
-        servers[i]['map'].update(info)
+
+    ppd({'msg': 'fetching map info for server maps', 'n_servers': len(servers), 'maps': [s['map']['name'] for s in servers]})
+
+    for server in servers:
+        info = {'map': server['map']['name']} | get_map_info(driver, server['map']['url'])
+        server['map'].update(info)
         if server['map']['name'] in local_maps:
-            servers[i]['local'] = '✓'
+            server['local'] = '✓'
         else:
-            servers[i]['local'] = '✗'
-        ppd(info, indent=2)
+            server['local'] = '✗'
+        ppd(info, style='paraiso-dark')
 
+    print('-> ALL SERVERS')
     print(create_table(servers))
-    input('press enter to download')
+
+    todo = [s for s in servers if s['local'] == '✗']
+    if not todo:
+        ppd({'msg': 'No maps to download! exiting'})
+        return
+    print('-> MAPS TO DOWNLOAD')
+    print(create_table(todo))
+
+    if interactive:
+        input('press enter to download...')
 
     # count downloaded/exists
-    counts = defaultdict(list)
+    downloaded = []
     for i, server in enumerate(servers):
         if server['local'] == '✓':
             continue
+        ppd({'msg': 'downloading map to CSGO maps dir', 'i': i+1, 'total': len(servers), 'map': server['map']['name']})
         bzip_fpath = download_map(driver, server['map']['url'])
+
         if bzip_fpath is None:
             continue
+        # unzip, copy to csgo maps dir, remove temp/downloaded files
         fpath = bzip2_decompress(bzip_fpath)
         shutil.copy(fpath, csgo_map_dir)
-        counts['downloaded'].append(server['map']['name'])
-        ppd({'msg': 'downloaded map to CSGO maps dir', 'map': server['map']['name']})
-
+        downloaded.append(server['map']['name'])
         for fpath in {bzip_fpath, fpath}:
             os.remove(fpath)
+        ppd({'msg': 'downloaded map to CSGO maps dir', 'i': i+1, 'total': len(servers), 'map': server['map']['name']})
+
     driver.close()
 
-    ppd(counts, indent=2)
+    ppd({'downloaded': downloaded}, indent=2)
 
+def parse_args():
+    'Parses the command line arguments'
+    parser = ArgumentParser(description='SurfHeaven map downloader')
+    parser.add_argument('-c', '--csgo-map-dir', help='path to the CSGO maps directory')
+    parser.add_argument('-d', '--download-dir', help='path to the download directory', default='.', required=False)
+    parser.add_argument('-n', '--no-interactive', action='store_false', dest='interactive', help='do not prompt for download confirmation')
 
+    return parser.parse_args().__dict__
 
 if __name__ == '__main__':
-    run(csgo_map_dir=sys.argv[1])
+    run(**parse_args())
