@@ -165,7 +165,7 @@ def server_to_row(server):
 def create_table(servers):
     'Creates a table from the server list'
     return tabulate.tabulate(
-        list(map(server_to_row, servers)),
+        sorted(list(map(server_to_row, servers)), key=lambda s: s[3]),
         headers=['name', 'host', 'map', 'tier', 'stage_type', 'url', 'completions', 'times played', 'author', 'added', 'local'],
         tablefmt='rounded_grid',
     )
@@ -182,8 +182,9 @@ def run(csgo_map_dir, download_dir='.', interactive=True):
     ppd({'msg': 'fetching current server list', 'url': SERVER_LIST_URL})
     servers = list(list_current_servers(driver))
 
-
-    ppd({'msg': 'fetching map info for server maps', 'n_servers': len(servers), 'maps': [s['map']['name'] for s in servers]})
+    ppd({
+        'msg': 'fetching map info for server maps', 'n_servers': len(servers), 'maps': {s['host']: s['map']['name'] for s in servers}
+    }, indent=2)
 
     for server in servers:
         info = {'map': server['map']['name']} | get_map_info(driver, server['map']['url'])
