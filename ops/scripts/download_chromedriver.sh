@@ -17,7 +17,7 @@ fi
 chrome_versions=$(curl -s https://googlechromelabs.github.io/chrome-for-testing/known-good-versions-with-downloads.json)
 # e.g. https://storage.googleapis.com/chrome-for-testing-public/122.0.6261.69/linux64/chromedriver-linux64.zip
 url_for_version=$(
-  echo $chrome_versions \
+  echo "$chrome_versions" \
     | jq -r ".versions[]
       | select( .version == \"$(/usr/bin/google-chrome --version | cut -d' ' -f3)\" )
       | .downloads.chromedriver[]
@@ -25,9 +25,10 @@ url_for_version=$(
       | .url"
 )
 
+# remove the old chromedriver, download the new one and unzip it
 if [ -n "${url_for_version:-}" ]; then
   rm -rf "chromedriver-${PLATFORM}*"
-  wget $url_for_version
+  wget "$url_for_version"
   unzip chromedriver-linux64.zip
 fi
 
