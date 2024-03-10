@@ -90,7 +90,8 @@ def get_map_info(driver, map_url):
     return info
 
 def get_download_size(url):
-    return int(urllib.request.urlopen(url).headers['Content-Length'])
+    return 0
+    return int(urllib.request.urlopen(url, timeout=10).headers['Content-Length'])
 
 def download_map(driver, map_url):
     'Visits the map page, clicks the download button and waits for the file to download'

@@ -3,6 +3,7 @@
 from collections import namedtuple
 from itertools import count
 import os
+import random
 import time
 from typing import Iterable, List
 import urllib
@@ -83,15 +84,14 @@ def run(search_url, csgo_map_dir, download_dir='.', interactive=True) -> Iterabl
     ppd({'msg': f'found local maps', 'n': len(results)})
 
     todo = [map for map in results if map.name not in local_maps]
+    random.shuffle(todo)
     print(create_results_table(todo))
     ppd({'msg': f'fetching maps', 'n': len(todo)})
 
     for i, map in enumerate(todo):
+        ppd({'msg': f'downloading map', 'idx': f'{i+1}/{len(todo)}', 'map': map.name})
         try:
-            download_map(
-                driver       = driver,
-                map_url      = map.url,
-            )
+            download_map(driver, map.url)
         except urllib.error.HTTPError as e:
             ppd({
                 'msg': 'file download failed',
