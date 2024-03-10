@@ -9,16 +9,20 @@ services:
       dockerfile: ops/Dockerfile
     container_name: surftimer-64t
     network_mode: host
+      # restart: always
     environment:
-      - SRCDS_TOKEN=$CSGO_GSLT
-      - SRCDS_NET_PUBLIC_ADDRESS=$SRCDS_NET_PUBLIC_ADDRESS
-      - SRCDS_IP=0.0.0.0
-      - SRCDS_FPSMAX=120
-      - SRCDS_TICKRATE=64
-      - SRCDS_HOSTNAME=surftimer_64t
-      - SRCDS_STARTMAP=${SRCDS_STARTMAP:-surf_utopia_njv}
+      - CSGO_GSLT=$CSGO_GSLT
+      - CSGO_IP=0.0.0.0
+      - CSGO_TICKRATE=64
+      - CSGO_HOSTNAME=surftimer_64t
+      - CSGO_MAP=surf_utopia_njv
+      - CSGO_GAME_TYPE=3
+      - CSGO_GAME_MODE=0
+      - SOURCEMOD_PLUGINS_ENABLED="*"
+      - VALIDATE_SERVER_FILES=true
     volumes:
-      - ./csgo:/home/steam/csgo-dedicated/csgo
+      - $PWD/csgo-timche:/home/csgo/server
+      - $PWD/csgo-timche-user:/usr/csgo
     depends_on:
       - surftimer-64t-db
 
@@ -65,4 +69,25 @@ services:
       - ./mysql_100t:/var/lib/mysql
     ports:
       - "3306:3306"
+
+  # surftimer-64t:
+  #   image: surftimer
+  #   build:
+  #     context: .
+  #     dockerfile: ops/Dockerfile
+  #   container_name: surftimer-64t
+  #   network_mode: host
+  #   environment:
+  #     - SRCDS_TOKEN=$CSGO_GSLT
+  #     - SRCDS_NET_PUBLIC_ADDRESS=$SRCDS_NET_PUBLIC_ADDRESS
+  #     - SRCDS_IP=0.0.0.0
+  #     - SRCDS_FPSMAX=120
+  #     - SRCDS_TICKRATE=64
+  #     - SRCDS_HOSTNAME=surftimer_64t
+  #       # - SRCDS_STARTMAP=${SRCDS_STARTMAP:-surf_utopia_njv}
+  #   volumes:
+  #     - $PWD/csgo-data:/home/steam/csgo-dedicated
+  #   depends_on:
+  #     - surftimer-64t-db
+  #
 
