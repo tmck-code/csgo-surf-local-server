@@ -101,14 +101,13 @@ def download_map(driver, map_url, download_dir='.', dest_dir='.'):
     map_download_url = soup.find('a', {'title': 'Download'})['href']
     xpath = '/html/body/div[2]/section/div/div[1]/div/div/div/div[1]/div/h2/a'
 
-
     # find the download button and click it
     map_download_url = soup.find('a', {'title': 'Download'})['href']
     byte_size = 0
 
     try:
         ppd({'msg': 'fetching map file size', 'map_download_url': map_download_url})
-        d = urllib.request.urlopen(map_download_url, timeout=10)
+        d = urllib.request.urlopen(map_download_url, timeout=20)
         byte_size = int(d.info()['Content-Length'])
         ppd({'msg': 'found map file size', 'size': bytes_to_mb(int(byte_size))})
     except urllib.error.HTTPError as e:
@@ -117,11 +116,16 @@ def download_map(driver, map_url, download_dir='.', dest_dir='.'):
     except urllib.error.URLError as e:
         ppd({'HTTP error': map_download_url, 'error': {'class': e.__class__.__name__, 'message': str(e)}}, style='vim')
         byte_size = 0
+        driver.get(map_url)
 
     try:
+        wait = WebDriverWait(driver, 20)
+        wait.until(EC.element_to_be_clickable((By.XPATH, xpath)))
+
+        ppd({'msg': 'downloading', 'ur': map_download_url})
         driver.execute_script(
             'arguments[0].click();',
-            WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, xpath))),
+            WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.XPATH, xpath))),
         )
     except urllib.error.HTTPError as e:
         ppd({'msg': '404 error', 'url': map_download_url}, style='vim')
