@@ -5,7 +5,7 @@ already in the local maps dir and downloads/unzips/copies them to the local dir.
 
 Usage:
 ./ops/scripts/surfheaven.py \
-    --csgo-map-dir /some/location/SteamLibrary/steamapps/common/Counter-Strike\ Global\ Offensive/csgo/maps/
+    /some/location/SteamLibrary/steamapps/common/Counter-Strike\ Global\ Offensive/csgo/maps/
 '''
 
 from argparse import ArgumentParser
@@ -16,7 +16,6 @@ from datetime import datetime
 import urllib
 
 from bs4 import BeautifulSoup
-from pygments import lexers, formatters, styles, highlight
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
@@ -25,41 +24,40 @@ import tabulate
 
 SERVER_LIST_URL = 'https://surfheaven.eu/servers'
 
+# OTT pretty-printing code ----------------------
+from pygments import lexers, formatters, styles, highlight
 
 def ppd(d, indent=None, style='material'):
     'pretty-prints a dictionary, used for simple logs'
     print(highlight(json.dumps(d, indent=indent), lexers.JsonLexer(), formatters.TerminalTrueColorFormatter(style=styles.get_style_by_name(style))).strip())
 
-def bytes_to_mb(byte_size: int) -> str:
-    return f'{byte_size/(1024*1024):.02f} MB'
+def bytes_to_mb(n_bytes: int) -> str:
+    'Converts bytes to MB'
+    return f'{n_bytes/(1024*1024):.02f} MB'
 
-def file_size_in_mb(fpath):
+def file_size_in_mb(fpath: str) -> str:
+    'Returns the file size in MB'
     return bytes_to_mb(os.path.getsize(fpath))
 
-def wait_for_download(download_dir, total_bytes):
+def wait_for_download(download_dir, byte_size: int):
     'finds the first .crdownload file and waits for it to finish downloading (aka disappear)'
     start_time = datetime.now()
     time.sleep(0.1)
     pending_fpath = glob.glob('*.crdownload')[0]
     while True:
         if os.path.exists(pending_fpath):
-            current_bytes = os.path.getsize(pending_fpath)
-            total_size_mb, current_size_mb = bytes_to_mb(total_bytes), bytes_to_mb(current_bytes)
-
-            progress = {
-                'msg': 'downloading', 'pending_fpath': pending_fpath, 'elapsed': str(datetime.now() - start_time),
-                'progress': {
-                    'size': current_size_mb,
-                    'total': total_size_mb,
-                    'percent': f'{100*current_bytes/total_bytes:.02f}%' if total_bytes else '?'
-                },
-                'elapsed': str(datetime.now() - start_time),
-            }
-            ppd(progress, style='paraiso-dark')
+            ppd({
+                'msg':           'downloading',
+                'pending_fpath': pending_fpath,
+                'elapsed':       str(datetime.now() - start_time),
+                'size':          file_size_in_mb(pending_fpath),
+                'total':         bytes_to_mb(byte_size),
+                'percent':       f'{100*os.path.getsize(pending_fpath)/byte_size:.02f}%' if byte_size else '?'
+            }, style='paraiso-dark')
             time.sleep(3)
             continue
         else:
-            ppd({'msg': 'downloading', 'fpath': pending_fpath.removesuffix('.crdownload')})
+            ppd({'msg': 'downloaded', 'downloaded_fpath': pending_fpath.removesuffix('.crdownload')})
             break
     return pending_fpath.removesuffix('.crdownload')
 
@@ -91,63 +89,35 @@ def get_map_info(driver, map_url):
     info = parse_map_info(soup)
     return info
 
+def get_download_size(url):
+    return int(urllib.request.urlopen(url).headers['Content-Length'])
 
-def download_map(driver, map_url, download_dir='.', dest_dir='.'):
+def download_map(driver, map_url):
     'Visits the map page, clicks the download button and waits for the file to download'
     driver.get(map_url)
     soup = BeautifulSoup(driver.page_source, 'html.parser')
+    # give the page some time to load
+    time.sleep(5)
 
     # find the download button and click it
     map_download_url = soup.find('a', {'title': 'Download'})['href']
+    byte_size = get_download_size(map_download_url)
+
     xpath = '/html/body/div[2]/section/div/div[1]/div/div/div/div[1]/div/h2/a'
-
-    # find the download button and click it
-    map_download_url = soup.find('a', {'title': 'Download'})['href']
-    byte_size = 0
-
-    try:
-        ppd({'msg': 'fetching map file size', 'map_download_url': map_download_url})
-        d = urllib.request.urlopen(map_download_url, timeout=20)
-        byte_size = int(d.info()['Content-Length'])
-        ppd({'msg': 'found map file size', 'size': bytes_to_mb(int(byte_size))})
-    except urllib.error.HTTPError as e:
-        ppd({'404 error': map_download_url, 'error': {'class': e.__class__.__name__, 'message': str(e)}}, style='vim')
-        return
-    except urllib.error.URLError as e:
-        ppd({'HTTP error': map_download_url, 'error': {'class': e.__class__.__name__, 'message': str(e)}}, style='vim')
-        byte_size = 0
-        driver.get(map_url)
-
-    try:
-        wait = WebDriverWait(driver, 20)
-        wait.until(EC.element_to_be_clickable((By.XPATH, xpath)))
-
-        ppd({'msg': 'downloading', 'ur': map_download_url})
-        driver.execute_script(
-            'arguments[0].click();',
-            WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.XPATH, xpath))),
-        )
-    except urllib.error.HTTPError as e:
-        ppd({'msg': '404 error', 'url': map_download_url}, style='vim')
-        return
-
+    driver.execute_script(
+      'arguments[0].click();',
+      WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.XPATH, xpath))),
+    )
     ppd({'msg': 'file download started', 'map_url': map_url})
+
     soup = BeautifulSoup(driver.page_source, 'html.parser')
     heading = soup.find('h1')
     if heading is not None and heading.get_text() == '404 Not Found':
-        ppd({'msg': '404 error', 'url': map_download_url}, style='vim')
+        print({'404 error': map_download_url})
         return
     else:
-        bzip_fpath = wait_for_download(os.getcwd(), byte_size)
-
-    if bzip_fpath is None:
-        return
-    # unzip, copy to csgo maps dir, remove temp/downloaded files
-    fpath = bzip2_decompress(bzip_fpath)
-    shutil.copy(fpath, dest_dir)
-    for fpath in {bzip_fpath, fpath}:
-        os.remove(fpath)
-    ppd({'msg': 'downloaded map to CSGO maps dir', 'map_url': map_url})
+        fpath = wait_for_download('.', byte_size=byte_size)
+    return fpath
 
 def list_current_servers(driver):
     'Visits the server list page and parses the info of the AU servers'
@@ -188,11 +158,10 @@ def bzip2_decompress(fpath):
         ostream.write(istream.read())
     return fpath.removesuffix('.bz2')
 
-def init_browser(download_dir, headless=True):
+def init_browser(download_dir):
     'Initialises a headless chrome browser'
     options = webdriver.ChromeOptions()
-    if headless:
-        options.add_argument('--headless')
+    options.add_argument('--headless')
     options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
     options.add_experimental_option('prefs', {'download.default_directory': download_dir})
@@ -265,18 +234,27 @@ def run(csgo_map_dir, download_dir='.', interactive=True):
     # count downloaded/exists
     downloaded = []
     for i, server in enumerate(servers):
-        if server['local'] == '✓':
+        ppd({'msg': 'downloading map to CSGO maps dir', 'i': i+1, 'total': len(servers), 'map': server['map']['name']})
+        bzip_fpath = download_map(driver, server['map']['url'])
+
+        if bzip_fpath is None:
             continue
-        download_map(driver, server['map']['url'], download_dir=os.getcwd(), dest_dir=csgo_map_dir)
-        ppd({'msg': 'downloading map', 'i': i+1, 'total': len(servers), 'map': server['map']['name'], 'destination': csgo_map_dir})
+        # unzip, copy to csgo maps dir, remove temp/downloaded files
+        fpath = bzip2_decompress(bzip_fpath)
+        shutil.copy(fpath, csgo_map_dir)
+        downloaded.append(server['map']['name'])
+        for fpath in {bzip_fpath, fpath}:
+            os.remove(fpath)
+        ppd({'msg': 'downloaded map to CSGO maps dir', 'i': i+1, 'total': len(servers), 'map': server['map']['name']})
 
     driver.close()
 
+    ppd({'downloaded': downloaded}, indent=2)
 
 def parse_args():
     'Parses the command line arguments'
     parser = ArgumentParser(description='SurfHeaven map downloader')
-    parser.add_argument('-c', '--csgo-map-dir', help='path to the CSGO maps directory', required=True)
+    parser.add_argument('-c', '--csgo-map-dir', help='path to the CSGO maps directory')
     parser.add_argument('-d', '--download-dir', help='path to the download directory', default='.', required=False)
     parser.add_argument('-n', '--no-interactive', action='store_false', dest='interactive', help='do not prompt for download confirmation')
 

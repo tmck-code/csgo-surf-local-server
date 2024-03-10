@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 
-from typing import Iterable, List
-import time
-import os
+from collections import namedtuple
 from itertools import count
+import os
+import time
+from typing import Iterable, List
+import urllib
 
 from bs4 import BeautifulSoup
 from selenium.webdriver.common.by import By
 import tabulate
-from collections import namedtuple
 
 BASE_URL = 'https://surfheaven.eu'
 
@@ -71,7 +72,7 @@ def create_results_table(search_results: List[MapSearchResult]):
 
 
 def run(search_url, csgo_map_dir, download_dir='.', interactive=True) -> Iterable[MapSearchResult]:
-    driver = init_browser(download_dir=os.getcwd(), headless=True)
+    driver = init_browser(download_dir=os.getcwd())
 
     ppd({'msg': 'fetching search results', 'url': search_url})
 
@@ -86,12 +87,17 @@ def run(search_url, csgo_map_dir, download_dir='.', interactive=True) -> Iterabl
     ppd({'msg': f'fetching maps', 'n': len(todo)})
 
     for i, map in enumerate(todo):
-        download_map(
-            driver       = driver,
-            map_url      = map.url,
-            download_dir = 'here',
-            dest_dir     = csgo_map_dir
-        )
+        try:
+            download_map(
+                driver       = driver,
+                map_url      = map.url,
+            )
+        except urllib.error.HTTPError as e:
+            ppd({
+                'msg': 'file download failed',
+                'map_url': map.url,
+                'error': {'class': type(e), 'message': str(e)}
+            })
 
 
 if __name__ == '__main__':
