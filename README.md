@@ -125,15 +125,21 @@ In order to create a GSLT token, navigate to this page, login and follow the pro
 https://github.com/Sayt123/SurfZones/pull/2#issuecomment-1630978597
 
 ```
-When manually zoning like you did here, you'd want to raise your zones quite a bit on both ends. Start zones you usually want to encapsulate the info_teleport_destination entity where players spawn. You can see them with !itd. This is also where you can find other spawns like the bonus!
+When manually zoning like you did here, you'd want to raise your zones quite a bit on both ends.
+Start zones you usually want to encapsulate the info_teleport_destination entity where players
+spawn. You can see them with !itd. This is also where you can find other spawns like the bonus!
 
-Most modern maps/mappers also use hookzones to make zoning easier as well. A trigger_multiple entity that's given a name like mapstart | cp1 | bonus1start | bonus1end. Using the !hookzone menu you can actually hook a map or bonus zone TO that trigger shape the mapper made.
+Most modern maps/mappers also use hookzones to make zoning easier as well. A trigger_multiple
+entity that's given a name like mapstart | cp1 | bonus1start | bonus1end. Using the !hookzone
+menu you can actually hook a map or bonus zone TO that trigger shape the mapper made.
 
-(Hard to see in the picture but with !triggers enabled you can see the trigger_multiple's shape this hookzone is using.)
+(Hard to see in the picture but with !triggers enabled you can see the trigger_multiple's shape
+this hookzone is using.)
 
 ...
 
-Other than that on linear maps like this you also would want to add a few Checkpoint zones evenly spaced between the start and end zones.
+Other than that on linear maps like this you also would want to add a few Checkpoint zones
+evenly spaced between the start and end zones.
 
 ...
 ```
