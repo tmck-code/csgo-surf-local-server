@@ -10,17 +10,20 @@ plugin/bootstrap:
 
 db/bootstrap:
 	# inject the db password into the sourcemod config
-	@sed -i "s/YOUR_PASSWORD/$(DB_PASSWORD)/g" csgo-data/csgo/addons/sourcemod/configs/databases.cfg
+	@sed -i "s/YOUR_PASSWORD/$(MYSQL_ROOT_PASSWORD)/g" steam/csgo-dedicated/csgo/addons/sourcemod/configs/databases.cfg
 
-	docker-compose up -d surftimer-64t
+	docker compose up -d surftimer-64t
 	# wait for the database to be ready
-	until mysqladmin status -h 127.0.0.1 -u root -p$(DB_PASSWORD); do sleep 1; done
+	until docker exec -it surftimer-64t-db bash -c "mysqladmin status -h 127.0.0.1 -u root -p$(MYSQL_ROOT_PASSWORD)"; do sleep 1; done
 	# bootstrap the database
-	docker exec -it surftimer-64t bash -c "mysql -u root -h 127.0.0.1 --password=$(DB_PASSWORD) surftimer < /home/csgo/server/csgo/scripts/mysql-files/fresh_install.sql"
-	docker exec -it surftimer-64t bash -c "mysql -u root -h 127.0.0.1 --password=$(DB_PASSWORD) surftimer < /home/csgo/server/csgo/SurfZones/Zones/REPLACE_ALL_maptier.sql"
-	docker exec -it surftimer-64t bash -c "mysql -u root -h 127.0.0.1 --password=$(DB_PASSWORD) surftimer < /home/csgo/server/csgo/SurfZones/Zones/REPLACE_ALL_spawnlocations.sql"
-	docker exec -it surftimer-64t bash -c "mysql -u root -h 127.0.0.1 --password=$(DB_PASSWORD) surftimer < /home/csgo/server/csgo/SurfZones/Zones/REPLACE_ALL_zones.sql"
-	docker-compose down
+	@echo "Initialising DB schema for SurfTimer"
+	docker exec -it surftimer-64t bash -c "mysql -u root -h 127.0.0.1 --password=$(MYSQL_ROOT_PASSWORD) < /home/steam/csgo-dedicated/csgo/scripts/mysql-files/fresh_install.sql"
+
+	@echo "Adding map tiers, zones & spawn locations"
+	docker exec -it surftimer-64t bash -c "mysql -u root -h 127.0.0.1 --password=$(MYSQL_ROOT_PASSWORD) surftimer < /home/steam/csgo-dedicated/csgo/SurfZones/Zones/REPLACE_ALL_maptier.sql"
+	docker exec -it surftimer-64t bash -c "mysql -u root -h 127.0.0.1 --password=$(MYSQL_ROOT_PASSWORD) surftimer < /home/steam/csgo-dedicated/csgo/SurfZones/Zones/REPLACE_ALL_spawnlocations.sql"
+	docker exec -it surftimer-64t bash -c "mysql -u root -h 127.0.0.1 --password=$(MYSQL_ROOT_PASSWORD) surftimer < /home/steam/csgo-dedicated/csgo/SurfZones/Zones/REPLACE_ALL_zones.sql"
+	docker compose down --remove-orphans
 
 bootstrap: build plugin/bootstrap db/bootstrap
 
