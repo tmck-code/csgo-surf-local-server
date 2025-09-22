@@ -10,6 +10,8 @@ RUN apt update \
 USER steam
 ENV CSGO_DIR=/home/steam/csgo-dedicated/csgo/
 
+RUN sed -i 's/autoupdate/norestart/g' /home/steam/entry.sh
+
 # Download the most recent version of the surftimer:dev branch (https://github.com/surftimer/SurfTimer/archive/refs/heads/dev.zip)
 ENV SURFTIMER_ZIP=https://github.com/surftimer/SurfTimer/archive/b9c860942b8a55b7e36c244264f53c4e6d13a32b.zip
 WORKDIR /tmp
