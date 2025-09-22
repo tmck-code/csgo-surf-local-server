@@ -5,6 +5,11 @@
 - This repository contains the tools to run a local CSGO SurfTimer™ server in docker.
 - This can bootstrap a new one with all the required dependencies. or using an existing `csgo` directory.
 
+This project stands on the shoulders of giants, namely
+
+- [SurfTimer](https://github.com/surftimer/SurfTimer)
+- [SurfZones](https://github.com/Sayt123/SurfZones)
+
 ---
 
 - [csgo-surf-local-server](#csgo-surf-local-server)
@@ -64,9 +69,10 @@ There are a few distinct stages that occur in order to get everything in place
 2. Copying the CSGO directory from the Docker image -> your local machine.
    1. The CSGO directory in the docker image contains all of the required plugins in the correct location
    2. Pulling this into your local machine allows easy file access & backups
-3. Bootstrap the MySQL database with the zones
+3. Bootstrap the MySQL database
    1. The SurfTimer plugin needs zone coordinates and WR times in order to function properly!
    2. These sql files were downloaded during the docker build, copied to the local machine, and then bind-mounted for running
+   3. This step also injects the `DB_PASSWORD` into the databases.cfg file on your local
 4. Tweak configs
    1. Set up admin users
    2. Adjust server cfg file
