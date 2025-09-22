@@ -1,7 +1,6 @@
 version: '3.4'
 
 services:
-
   surftimer-64t:
     image: surftimer
     build:
@@ -9,22 +8,19 @@ services:
       dockerfile: ops/Dockerfile
     container_name: surftimer-64t
     network_mode: host
-      # restart: always
-    environment:
-      - CSGO_GSLT=$CSGO_GSLT
-      - CSGO_IP=0.0.0.0
-      - CSGO_TICKRATE=64
-      - CSGO_HOSTNAME=surftimer_64t
-      - CSGO_MAP=surf_utopia_njv
-      - CSGO_GAME_TYPE=3
-      - CSGO_GAME_MODE=0
-      - SOURCEMOD_PLUGINS_ENABLED="*"
-      - VALIDATE_SERVER_FILES=true
-    volumes:
-      - $PWD/csgo-timche:/home/csgo/server
-      - $PWD/csgo-timche-user:/usr/csgo
     depends_on:
       - surftimer-64t-db
+    environment:
+      SRCDS_TOKEN: $CSGO_GSLT
+      SRCDS_NET_PUBLIC_ADDRESS: $SRCDS_NET_PUBLIC_ADDRESS
+      SRCDS_IP: 0.0.0.0
+      SRCDS_LAN: 1
+      SRCDS_FPSMAX: 120
+      SRCDS_STARTMAP: ${SRCDS_STARTMAP:-surf_utopia_njv}
+      SRCDS_PW: $CSGO_PASSWORD
+      SRCDS_RCONPW: $RCON_PASSWORD
+    volumes:
+      - ./steam:/home/steam
 
   surftimer-100t:
     image: surftimer
@@ -42,33 +38,34 @@ services:
       - SRCDS_HOSTNAME=surftimer_100t
       - SRCDS_STARTMAP=${SRCDS_STARTMAP:-surf_utopia_njv}
     volumes:
-      - ./csgo:/home/steam/csgo-dedicated/csgo
+      - ./csgo-dedicated:/home/steam/csgo-dedicated
     depends_on:
       - surftimer-100t-db
 
-  surftimer-64t-db:
-    image: mysql:latest
-    container_name: surftimer-64t-db
+  surftimer-db:
+    image: mysql:8.0.34
     command: --default-authentication-plugin=mysql_native_password
     environment:
-      - MYSQL_DATABASE=sourcemod
-      - MYSQL_ROOT_PASSWORD=${CSGO_DB_ROOT_PASSWORD:-psswd}
-    volumes:
-      - ./mysql_64t:/var/lib/mysql
+      MYSQL_DATABASE: sourcemod
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/MYSQL_ROOT_PASSWORD
+    secrets:
+      - MYSQL_ROOT_PASSWORD
     ports:
       - "3306:3306"
 
+  surftimer-64t-db:
+    extends:
+      service: surftimer-db
+    container_name: surftimer-64t-db
+    volumes:
+      - ./mysql_64t:/var/lib/mysql
+
   surftimer-100t-db:
-    image: mysql:latest
+    extends:
+      service: surftimer-db
     container_name: surftimer-100t-db
-    command: --default-authentication-plugin=mysql_native_password
-    environment:
-      - MYSQL_DATABASE=sourcemod
-      - MYSQL_ROOT_PASSWORD=${CSGO_DB_ROOT_PASSWORD:-psswd}
     volumes:
       - ./mysql_100t:/var/lib/mysql
-    ports:
-      - "3306:3306"
 
   # surftimer-64t:
   #   image: surftimer
@@ -90,4 +87,14 @@ services:
   #   depends_on:
   #     - surftimer-64t-db
   #
+
+secrets:
+  MYSQL_ROOT_PASSWORD:
+    file: ./secrets/MYSQL_ROOT_PASSWORD.txt
+  CSGO_GSLT:
+    environment: CSGO_GSLT
+  CSGO_PASSWORD:
+    environment: CSGO_PASSWORD
+  RCON_PASSWORD:
+    environment: RCON_PASSWORD
 
